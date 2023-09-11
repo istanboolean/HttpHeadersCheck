@@ -11,16 +11,15 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 
 | Adım | Açıklama |
 | ---- | -------- |
-| 1    | Bu repository'yi klonlayın: `https://github.com/istanboolean/HttpResponseHeadersCheck.git` |
-| 2    | Klonladığınız dizine gidin: `cd HttpResponseHeadersCheck` |
-| 3    | cd ile içine girin , HttpResponseCheck dosyasına girin. |
-| 4    | dosya içini listelediğinizde "httpcheck.py" python dosyasını göreceksiniz. chmod +x ile dosyayı çalıştırılabilir duruma getirin.|
-| 5    | Gerekli Python kütüphanelerini yükleyin: `pip install -r requirements.txt` Kütüphaneler otomatik yüklenir.|
+| 1    | Bu repository'yi klonlayın: `https://github.com/istanboolean/HttpHeadersCheck.git` |
+| 2    | Klonladığınız dosya içine gidin: `cd HttpHeadersCheck` |
+| 3    | ls ile listeleyin, httpcheck.py adında Python betiği göreceksiniz. |
+| 4    | "httpcheck.py" Python betiğini chmod +x komutunu kullanarak çalıştırılabilir hale getirin.|
+| -    | Gerekli Python kütüphanelerini yükleyin: `pip install -r requirements.txt` Kütüphaneler otomatik yüklenir.|
 
-
+![Ekran Resmi 2023-09-11 14 51 19](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/10472de6-0e81-419c-a571-06ea7050690a)
                       Tool'u kullanın:    python3 httpcheck.py 
-<img width="1171" alt="httpcheck" src="https://github.com/istanboolean/HttpResponseHeadersCheck/assets/98133561/e2f96ed8-c6d5-4c99-a1b3-ed1e101b372e">
-
+![Ekran Resmi 2023-09-11 14 50 33](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/08983c5d-a2d7-4f6f-b5d3-d02605567698)
                                                               
 
 ## Parametreler
@@ -38,6 +37,7 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 -C | Tüm başlıkları kontrol etmek için kullanılır.
 | -----------| ------------------------------------------------------------|
 
+![Ekran Resmi 2023-09-11 14 59 13](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/c3c8273e-9f81-4c02-86b9-7e521e67d7f0)
 
 
 ## Kullanım Örnekleri
@@ -48,9 +48,8 @@ Aşağıda, HTTP başlıklarını kontrol etmek için kullanabileceğiniz farkl�
 |-----------------------------------------|----------------------------------------------|------------------------------------------------------------------------|
 | Domain kontrolü                         | `python3 httpcheck.py -d example.com`        | Belirtilen domain için HTTP başlıklarını kontrol eder.                 |
 | Hedef IP kontrolü                       | `python3 httpcheck.py -t 192.168.1.33`       | Belirtilen IP adresi için HTTP başlıklarını kontrol eder.              |
-| Domain kontrolü ve tabloyla görüntüleme | `python3 httpcheck.py -d example.com -p`     | HTTP başlıklarını tablo şeklinde görüntüler.                           |
-| Belirli başlıkları kontrol etme         | `python3 httpcheck.py -d example.com -c Server Date` | Belirli başlıkları (örneğin, "Server" ve "Date") kontrol eder. |
-| Tüm başlıkları kontrol etme             | `python3 httpcheck.py -d example.com -C`     | Tüm HTTP başlıklarını kontrol eder.                                    | 
+| Belirli başlıkları kontrol etme         | `python3 httpcheck.py -d www.example.com -c Server Date` | Belirli başlıkları (örneğin, "Server" ve "Date") kontrol eder. |
+| Tüm başlıkları kontrol etme             | `python3 httpcheck.py -d www.example.com -C`     | Tüm HTTP başlıklarını kontrol eder.  | 
 
 ## Kod Çalışması
 
