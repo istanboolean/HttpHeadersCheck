@@ -1,4 +1,4 @@
-# Http Response Headers Check
+# Http Headers Check
 
 ### Giriş - Tanım
 
@@ -18,7 +18,9 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 | -    | Gerekli Python kütüphanelerini yükleyin: `pip install -r requirements.txt` Kütüphaneler otomatik yüklenir.|
 
 ![Ekran Resmi 2023-09-11 14 51 19](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/10472de6-0e81-419c-a571-06ea7050690a)
+
                       Tool'u kullanın:    python3 httpcheck.py 
+                      
 ![Ekran Resmi 2023-09-11 14 50 33](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/08983c5d-a2d7-4f6f-b5d3-d02605567698)
                                                               
 
