@@ -13,8 +13,7 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 | ---- | -------- |
 | 1    | Bu repository'yi klonlayın: `https://github.com/istanboolean/HttpHeadersCheck.git` |
 | 2    | Klonladığınız dosya içine gidin: `cd HttpHeadersCheck` |
-| 3    | ls ile listeleyin, httpcheck.py adında Python betiği göreceksiniz. |
-| 4    | "httpcheck.py" Python betiğini chmod +x komutunu kullanarak çalıştırılabilir hale getirin.|
+| 3    | "httpcheck.py" Python betiğini chmod +x komutunu kullanarak çalıştırılabilir hale getirin.|
 | -    | Gerekli Python kütüphanelerini yükleyin: `pip install -r requirements.txt` Kütüphaneler otomatik yüklenir.|
 
 ![Ekran Resmi 2023-09-11 14 51 19](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/10472de6-0e81-419c-a571-06ea7050690a)
