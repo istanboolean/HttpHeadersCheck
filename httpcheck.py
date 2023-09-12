@@ -68,6 +68,7 @@ parser.add_argument(
     "--check-all",
     action="store_true",
     help="Tüm HTTP başlıklarını kontrol etmek için kullanın.",
+    # -h parametresi argparser içindeki --help modülünü çalıştırır. 
 )
 
 # Argümanları işle
@@ -101,7 +102,7 @@ def get_response_headers(url):
         console.print(f"[bold red]Hata:[/bold red] {e}")
         return None
 
-def check_headers(headers_to_check, response_headers):
+def check_headers(headers_to_check, response_headers): # Başlıkları kontrol et
     if not response_headers:
         return []
     result_table = []
@@ -112,7 +113,7 @@ def check_headers(headers_to_check, response_headers):
             result_table.append((header, "Not found", get_header_description(header)))
     return result_table
 
-def get_header_description(header):
+def get_header_description(header): # Başlık açıklamalarını getir
     descriptions = {
        
 "X-Content-Type-Options":"""Tarayıcının dosyanın türünü değiştirmesini önler. Bu, potansiyel güvenlik açıklarını kapatır.
