@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
-import argparse
-from rich.console import Console
-from rich.table import Table
-import requests
+import argparse # Argümanları işlemek için
+from rich.console import Console # Kullanıcı dostu çıktı için
+from rich.table import Table # Kullanıcı dostu çıktı için
+import requests # HTTP istekleri için
+import ipaddress # IP adreslerini işlemek için
+from urllib.parse import urlparse # URL'leri işlemek için
+import urllib3 # SSL Hatasını Giderme (SSL: CERTIFICATE_VERIFY_FAILED)
+# SSL Hatasını Giderme (SSL: CERTIFICATE_VERIFY_FAILED) Hata mesajını gizle
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 print("""
   _   _ _____ _____ ____     _   _ _____    _    ____  _____ ____  ____     ____ _   _ _____ ____ _  __
@@ -12,7 +17,7 @@ print("""
  |  _  | | |   | | |  __/   |  _  | |___ / ___ \| |_| | |___|  _ < ___) | | |___|  _  | |__| |___| . \ 
  |_| |_| |_|   |_| |_|      |_| |_|_____/_/   \_\____/|_____|_| \_\____/   \____|_| |_|_____\____|_|\_\_
                                                                                                        
-                                                                                PurpleBox | istanboolean    """)
+                                                                            PurpleBox | istanboolean""")
 
 
 default_headers = [
@@ -72,15 +77,24 @@ args = parser.parse_args()
 console = Console()
 
 def normalize_url(url):
-    if not url.startswith("http://") and not url.startswith("https://"):
-        # URL başında http:// veya https:// yoksa ekleyin
-        url = f"http://{url}"
-    return url
+        if url == args.target_ip:
+            url = args.target_ip
+        else:
+            url = args.domain
+        try:
+            ip_address = ipaddress.ip_address(url) 
+            url = f"https://{url}"
+        except ValueError:
+            if not url.startswith("http://") and not url.startswith("https://"):
+                url = "https://" + url  
+            else:
+                url = url
+        return url
 
 def get_response_headers(url):
     try:
         url = normalize_url(url)  # URL'yi düzeltilmiş bir versiyonuyla güncelle
-        response = requests.get(url)
+        response = requests.get(url, verify=False)  # SSL sertifikası doğrulamasını devre dışı bırak
         response_headers = response.headers
         return response_headers
     except requests.exceptions.RequestException as e:
@@ -88,6 +102,8 @@ def get_response_headers(url):
         return None
 
 def check_headers(headers_to_check, response_headers):
+    if not response_headers:
+        return []
     result_table = []
     for header in headers_to_check:
         if header in response_headers:
@@ -160,7 +176,7 @@ def get_header_description(header):
     return descriptions.get(header, "Bu Başlık Kullanılıyor.")
 
 def main():
-    # Kullanım talimatlarını ve parametreleri göster.
+    # Kullanım talimatlarını ve parametreleri göster
     if args.domain:
         console.print(f"[bold green]Geçerli Domain:[/bold green] {args.domain}")
         url = args.domain
@@ -185,7 +201,7 @@ def main():
             table.add_column("Açıklama", style="bold white")
             for header, value, description in checked_headers:
                 if header in response_headers:
-                    continue
+                    table.add_row(header,value,"OK")
                 else:
                     table.add_row(header, value, description)
                 
@@ -193,7 +209,7 @@ def main():
             
     elif args.target_ip:
         console.print(f"[bold green]Geçerli Hedef IP:[/bold green] {args.target_ip}")
-        url = f"http://{args.target_ip}"
+        url = args.target_ip
         response_headers = get_response_headers(url)
         args.print = True
         if response_headers and args.print:
@@ -207,7 +223,7 @@ def main():
         if args.check or args.check_all:
             headers_to_check = args.check if args.check else default_headers
             checked_headers = check_headers(headers_to_check, response_headers)
-            console.print("\n[bold cyan]Başlık Kontrolleri[/bold cyan]")
+            console.print("\n[bold cyan]Başlık Kontrolleri[/bold cyan]\n")
             table = Table(show_header=True, header_style="bold cyan")
             table = Table(show_lines=True, header_style="bold cyan")
             table.add_column("Başlık", style="bold red")
@@ -215,7 +231,8 @@ def main():
             table.add_column("Açıklama", style="bold white")
             for header, value, description in checked_headers:
                 if header in response_headers:
-                    continue
+                    table.add_row(header,value,"OK")
+                    
                 else:
                     table.add_row(header, value, description)
                 
@@ -246,6 +263,7 @@ Aynı zamanda eksik ve misconfigured headers hakkında çözüm önerileri sunar
         table.add_column("Komut", style="bold white")
         table.add_row("Domain kontrolü örneği", "python3 httpcheck.py -d www.example.com")
         table.add_row("Hedef IP kontrolü örneği", "python3 httpcheck.py -t 192.168.1.1")
+        table.add_row("Hedef IP kontrolü örneği", "python3 httpcheck.py -t 192.168.1.1 -c Server Date")
         table.add_row("Belirli başlıkları kontrol etme örneği", "python3 httpcheck.py -d www.example.com -c Server Date")
         table.add_row("Tüm başlıkları kontrol etme örneği", "python3 httpcheck.py -d example.com -C")
         console.print(table)
