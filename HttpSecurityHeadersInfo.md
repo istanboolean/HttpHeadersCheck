@@ -7,6 +7,7 @@
 5. [X-XSS-Protection Header](#x-xss-protection-header)
 6. [Referrer-Policy Header](#-referrer-policy-header)
 7. [Feature-Policy Header](#-feature-policy-header)
+8. [Content-Security-Policy-Report-Only](content-security-policy-report-only)
 ---
 # 1 - X-Content-Type-Options
 
