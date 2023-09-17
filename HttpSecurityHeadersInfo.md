@@ -239,9 +239,15 @@ Direktifi, web sitesinin kaynak dosyalarına ekleyin.
 
 **Kullanım:**
 
-Feature-Policy: <özellik> <izin veya ret>   || Feature-Policy: microphone deny
+Feature-Policy: <özellik> < izin veya ret > 
 
-Örneğin, bir web sitesi, kullanıcıların mikrofonunu kullanmasını engellemek için yukarıdaki Feature-Policy header'ını kullanabilir.
+Örnek:
+
+* Feature-Policy: microphone allow      
+                Bu ifade, web sitesinin her zaman mikrofonunuza erişmesine izin vereceğini belirtir.
+
+* Feature-Policy: microphone deny      
+                Bu ifade, web sitesinin mikrofonunuza erişmesini tamamen reddeder.
 
 
 **Feature-Policy headers'ın direktifleri şunlardır:**
@@ -265,3 +271,23 @@ Feature-Policy: <özellik> <izin veya ret>   || Feature-Policy: microphone deny
 | screen-orientation | Ekran yönünü değiştirmeye izin verir veya reddeder. |
 | speaker | Bir hoparlör kullanmaya izin verir veya reddeder. |
 | usb | USB cihazlarını kullanmaya izin verir veya reddeder. |
+
+
+# 8- Content-Security-Policy-Report-Only
+
+Content-Security-Policy-Report-Only, bir web sitesinin yalnızca CSP ihlallerini rapor etmesini sağlayan bir güvenlik başlığıdır. Bu, CSP'yi devre dışı bırakmadan web sitenizi CSP'ye uyumlu hale getirmenin bir yoludur.
+Content-Security-Policy-Report-Only, bir web sitesinin CSP'yi test etmenize veya uyumluluk geliştirmenize olanak tanıyan güvenlik başlığıdır.
+
+**Örnekler:**
+
+* **CSP'yi yalnızca belirli kaynakların yüklenmesine izin vermek için:**
+
+Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;
+
+Bu, web sitesinin yalnızca kendi kaynaklarından, güvenli olarak dahil edilen koddan, güvenli olarak değerlendirilen koddan, kendi kaynaklarından, güvenli verilerden ve kendi kaynaklarından güvenli bir şekilde dahil edilen yazı tiplerinden kaynak yüklemesine izin verecektir.
+
+* **CSP'yi yalnızca belirli etki alanlarının yüklenmesine izin vermek için:**
+  
+Content-Security-Policy-Report-Only: default-src https://example.com; script-src https://example.com; img-src https://example.com; style-src https://example.com; font-src https://example.com;
+
+Bu, web sitesinin yalnızca https://example.com etki alanından kaynak yüklemesine izin verecektir.
