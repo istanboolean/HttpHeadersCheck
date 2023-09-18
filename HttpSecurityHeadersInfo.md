@@ -1,3 +1,11 @@
+# HTTP SECURITY HEADERS
+HTTP güvenlik başlıkları (HTTP security headers), web uygulamalarını güvenlik açıklarına karşı korumak için kullanılan HTTP başlıklarıdır. Bu başlıklar, web tarayıcılara ve web sunucularına nasıl davranmaları gerektiğini söyler.
+HTTP güvenlik başlıkları hakkında daha fazla bilgi için aşağıdaki kaynaklara bakabilirsiniz:
+
+* OWASP HTTP Security Headers Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+* Mozilla Developer Network - HTTP security headers: https://developer.mozilla.org/en-US/docs/Web/Security
+* Google Developers - HTTP security headers: https://www.searchenginejournal.com/http-security-headers/415404/
+
 # İçindekiler
 
 1. [Content Security Policy (CSP)](#content-security-policy)
@@ -279,16 +287,18 @@ Feature-Policy: <özellik> < izin veya ret >
 Content-Security-Policy-Report-Only, bir web sitesinin yalnızca CSP ihlallerini rapor etmesini sağlayan bir güvenlik başlığıdır. Bu, CSP'yi devre dışı bırakmadan web sitenizi CSP'ye uyumlu hale getirmenin bir yoludur.
 Content-Security-Policy-Report-Only, bir web sitesinin CSP'yi test etmenize veya uyumluluk geliştirmenize olanak tanıyan güvenlik başlığıdır.
 
-**Örnekler:**
-
 * **CSP'yi yalnızca belirli kaynakların yüklenmesine izin vermek için:**
 
-Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;
+**Örnekler:**
 
+```
+Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;
+```
 Bu, web sitesinin yalnızca kendi kaynaklarından, güvenli olarak dahil edilen koddan, güvenli olarak değerlendirilen koddan, kendi kaynaklarından, güvenli verilerden ve kendi kaynaklarından güvenli bir şekilde dahil edilen yazı tiplerinden kaynak yüklemesine izin verecektir.
 
 * **CSP'yi yalnızca belirli etki alanlarının yüklenmesine izin vermek için:**
   
+```
 Content-Security-Policy-Report-Only: default-src https://example.com; script-src https://example.com; img-src https://example.com; style-src https://example.com; font-src https://example.com;
-
+```
 Bu, web sitesinin yalnızca https://example.com etki alanından kaynak yüklemesine izin verecektir.
