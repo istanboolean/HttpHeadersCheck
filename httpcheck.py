@@ -3,6 +3,7 @@
 import argparse # Argümanları işlemek için
 from rich.console import Console # Kullanıcı dostu çıktı için
 from rich.table import Table # Kullanıcı dostu çıktı için
+from rich.text import Text # Kullanıcı dostu çıktı için
 import requests # HTTP istekleri için
 import ipaddress # IP adreslerini işlemek için
 from urllib.parse import urlparse # URL'leri işlemek için
@@ -20,27 +21,38 @@ print("""
                                                                             PurpleBox | istanboolean""")
 
 
-default_headers = [
-    "X-Content-Type-Options",
-    "X-Frame-Options",
-    "Content-Security-Policy",
-    "Strict-Transport-Security",
-    "X-XSS-Protection",
-    "Referrer-Policy",
-    "Feature-Policy",
-    "Content-Security-Policy-Report-Only",
-    "Cache-Control",
-    "Clear-Site-Data",
-    "X-Permitted-Cross-Domain-Policies",
-    "Expect-CT",
-    "Public-Key-Pins",
-    "X-Content-Security-Policy",
-    "X-Download-Options",
-    "X-DNS-Prefetch-Control",
-    "X-Robots-Tag",
-    "X-Request-ID",
-    "X-UA-Compatible",
-]
+security_headers = {
+    'X-Content-Type-Options': {
+        'recommended': True,
+        'directives': ['nosniff'],
+    },
+    'X-Frame-Options': {
+        'recommended': True,
+        'directives': ['deny', 'sameorigin', 'allow-from'],
+    },
+    'Strict-Transport-Security': {
+        'recommended': True,
+        'directives': ['max-age=31536000'],
+    },
+    'Content-Security-Policy': {
+        'recommended': True,
+        'directives': ['default-src', 'script-src', 'img-src', 'style-src', 'font-src', 'connect-src', 'report-uri'],
+    },
+    'X-XSS-Protection': {
+        'recommended': False,
+        'directives': ['1; mode=block'],
+    },
+    'Referrer-Policy': {
+        'recommended': True,
+        'directives': ['no-referrer', 'origin', 'same-origin', 'strict-origin', 'origin-when-cross-origin'],
+    },
+    'Feature-Policy': {
+        'recommended': True,
+        'directives': ['accelerometer', 'ambient-light-sensor', 'autoplay', 'camera', 'clipboard-read', 'clipboard-write', 'geolocation', 'gyroscope', 'magnetometer', 'microphone', 'midi', 'payment', 'push', 'screen-orientation', 'speaker', 'usb'],
+    },
+
+    # Eklemek istediğiniz başlıkları buraya ekleyebilirsiniz.
+}
 
 # Argümanları tanımla
 parser = argparse.ArgumentParser(description="HTTP Response Headers Kontrol Aracı")
@@ -102,79 +114,108 @@ def get_response_headers(url):
         console.print(f"[bold red]Hata:[/bold red] {e}")
         return None
 
-def check_headers(headers_to_check, response_headers): # Başlıkları kontrol et
+def check_headers(headers_to_check, response_headers):
     if not response_headers:
-        return []
-    result_table = []
+        return [], []
+    headers_found = []
+    headers_not_found = []
     for header in headers_to_check:
         if header in response_headers:
-            result_table.append((header, response_headers[header], ""))
+            header_value = response_headers[header]
         else:
-            result_table.append((header, "Not found", get_header_description(header)))
-    return result_table
+            header_value = None
+        description_result = get_header_description(header, header_value)
+        if header_value:
+            headers_found.append((header, header_value, description_result))
+        else:
+            headers_not_found.append((header, "Not found", description_result))
+    return headers_found, headers_not_found
 
-def get_header_description(header): # Başlık açıklamalarını getir
-    descriptions = {
-       
-"X-Content-Type-Options":"""Tarayıcının dosyanın türünü değiştirmesini önler. Bu, potansiyel güvenlik açıklarını kapatır.
-Öneri: Bu başlığı etkinleştirin ve "nosniff" değeri ile kullanın. Örnek: X-Content-Type-Options: nosniff""",
 
-"X-Frame-Options":"""Web sitelerinin başka sitelerde çerçeve içinde görüntülenmesini engeller. Bu, sitenizin bütünlüğünü ve güvenliğini korur.
-Öneri: Bu başlığı etkinleştirin ve "SAMEORIGIN" değeri ile kullanın. Örnek: X-Frame-Options: SAMEORIGIN""",
+def get_header_description(header_name, header_value):
+    security_headers = {
+    'X-Content-Type-Options': {
+        'default_value': 'nosniff',
+        'description': """Saldırganlar, web sitesinin yanıtlarında bulunan içerik türlerini değiştirerek, tarayıcının yanıtı yanlış yorumlamasını ve saldırganın kodunu çalıştırmasını sağlayabilir.
+Örneğin, bir web sitesi, bir resim dosyasını içeren bir yanıt döndürür. Tarayıcı, yanıtın MIME türünü "image/png" olarak belirler. Ancak, saldırgan, yanıtın MIME türünü "application/javascript" olarak değiştirebilir. 
+Bu, tarayıcının yanıtı JavaScript kodu olarak yorumlamasına ve saldırganın kodunu çalıştırmasına neden olur."""
+    },
+    'X-Frame-Options': {
+        'default_value': 'deny',
+        'description': """Bu başlık, web sitesinin çerçevelenmesine izin verilip verilmeyeceğini kontrol eder. Güvenli yönergeler şunlardır:
+SAMEORIGIN: Sayfanın yalnızca orijinal kaynağında çerçevelerde görüntülenmesine izin verilir. 
+DENY: Sayfanın hiçbir çerçevede görüntülenmesine izin verilmez. Katı bir security policy gerektiren durumlarda kullanılabilir. Bu, en güvenli seçenektir.
+ALLOW-FROM: Sayfanın yalnızca belirli bir kaynaktan çerçevelerde görüntülenmesine izin verilir. Örneğin, ALLOW-FROM https://example.com/ ile ayarlanırsa, 
+sayfa yalnızca https://example.com/ içinde çerçevelerde görüntülenebilir."""
+    },
+    'Strict-Transport-Security': {
+        'default_value': 'max-age=31536000',
+        'description': """HTTPS üzerinden erişimi zorunlu kılar. Bu, saldırganların HTTP üzerinden saldırmasını zorlaştırır. 
+HTTPS kullanımını zorlamak ve sertifikayı bir yıl boyunca hatırlamak için "max-age=31536000" ile ayarlanmalıdır.
+max-age: HSTS başlığının ne kadar süreyle geçerli olacağını belirtir. Bu örnekte, HSTS başlığı 1 yıl (31536000 saniye) boyunca geçerli olacaktır.
+includeSubDomains: HSTS başlığının sitenin tüm alt etki alanlarını da kapsayacağını belirtir. Bu, saldırganların HTTP üzerinden alt etki alanlarından saldırmasını zorlaştırır.
+preload: Tarayıcıların HSTS başlığını önbelleğe almasını sağlar. Bu, kullanıcıların web sitesine ilk kez eriştiklerinde bile HTTPS üzerinden erişmelerini sağlar. """
+    },
+    'X-XSS-Protection': {
+        'default_value': '1; mode=block',
+        'description': """Tarayıcıyı otomatik olarak XSS saldırılarını engellemek için "1; mode=block" ile ayarlanmalıdır.
+0: XSS koruması devre dışı bırakılır.
+1: XSS koruması etkinleştirilir, ancak tarayıcının kendi XSS korumasını kullanmaya devam etmesine izin verilir.
+1; mode=block: XSS koruması etkinleştirilir ve tarayıcının kendi XSS korumasını kullanmasına izin verilmez. Bu, en güvenli seçenektir."""
+    },
+    'Content-Security-Policy': {
+        'default_value': '',
+        'description': """Bu başlık, web sayfasının tarayıcıda yüklenirken hangi kaynaklara (örneğin, betikler, görüntüler, stil dosyaları) erişebileceğini belirler. 
+Web sitenizi XSS, CSRF, SQL injection ve diğer saldırılara karşı daha güvenli hale getirir.
+web sitesinin tarayıcıda yüklenirken hangi kaynaklara erişebileceğini kontrol eden bir HTTP başlığıdır. CSP, XSS, CSRF, SQL injection ve diğer saldırılara karşı sitenizi daha güvenli hale getirebilir.
 
-"Content-Security-Policy":"""Tarayıcıda yüklenebilecek kaynakları ve izin verilen eylemleri tanımlar. XSS gibi saldırılara karşı koruma sağlar.
-Öneri: Güvenlik politikanızı oluşturun ve bu başlığı etkinleştirin. Örnek: Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'""",
+'default-src' direktifi, web sayfasının tarayıcıda yüklenirken hangi kaynaklara erişebileceğini belirler. Varsayılan değer 'self', yani yalnızca aynı kaynaktan gelen kaynaklara erişilebilir. Daha güvenli bir seçenek, yalnızca belirli kaynaklara erişime izin veren 'script-src', 'img-src', 'style-src', 'font-src' ve 'connect-src' direktiflerini kullanmaktır.
 
-"Strict-Transport-Security":"""Tarayıcının sadece HTTPS üzerinden iletişim kurmasını zorlar. Veri iletimi sırasında güvenliği artırır.
-Öneri: Bu başlığı etkinleştirin ve "max-age" değeri ile bir yıl gibi uzun bir süre belirleyin. Örnek: Strict-Transport-Security: max-age=31536000""",
+'script-src' direktifi, web sayfasının hangi betiklere erişebileceğini belirler. 'self', yalnızca aynı kaynaktan gelen betiklere erişilebilir. Daha güvenli bir seçenek, yalnızca belirli kaynaklardan gelen betiklere erişime izin veren 'https://example.com' gibi bir URL belirtmektir.
 
-"X-XSS-Protection":"""Tarayıcılara XSS saldırılarına karşı otomatik koruma sağlar. Zararlı kodların yürütülmesini engeller.
-Öneri: Bu başlığı etkinleştirin ve "1; mode=block" değeri ile kullanın. Örnek: X-XSS-Protection: 1; mode=block""",
+'img-src' direktifi, web sayfasının hangi görüntülere erişebileceğini belirler. 'self', yalnızca aynı kaynaktan gelen görüntülere erişilebilir. Daha güvenli bir seçenek, yalnızca belirli kaynaklardan gelen görüntülere erişime izin veren 'https://example.com' gibi bir URL belirtmektir.
 
-"Referrer-Policy":"""Tarayıcıların hangi bilgileri referer olarak gönderebileceğini belirler. Gizliliği ve güvenliği artırır.
-Öneri: Bu başlığı etkinleştirin ve "no-referrer" veya "strict-origin" gibi uygun bir politika belirleyin. Örnek: Referrer-Policy: no-referrer""",
+'style-src' direktifi, web sayfasının hangi stil dosyalarına erişebileceğini belirler. 'self', yalnızca aynı kaynaktan gelen stil dosyalarına erişilebilir. Daha güvenli bir seçenek, yalnızca belirli kaynaklardan gelen stil dosyalarına erişime izin veren 'https://example.com' gibi bir URL belirtmektir.
 
-"Feature-Policy":"""Belirli tarayıcı özelliklerinin kullanımını sınırlar. Güvenliği ve gizliliği artırır.
-Öneri: Tarayıcı özelliklerini sınırlamak için bu başlığı etkinleştirin ve uygun bir yapılandırmayı kullanın. Örnek: Feature-Policy: geolocation 'none'; camera 'self'""",
+'font-src' direktifi, web sayfasının hangi yazı tiplerine erişebileceğini belirler. 'self', yalnızca aynı kaynaktan gelen yazı tiplerine erişilebilir. Daha güvenli bir seçenek, yalnızca belirli kaynaklardan gelen yazı tiplerine erişime izin veren 'https://example.com' gibi bir URL belirtmektir.
 
-"Content-Security-Policy-Report-Only":"""Politika ihlallerini raporlamak için kullanılır, ancak tarayıcıya bir politika uygulanmaz. Güvenlik politikalarının izlenmesine yardımcı olur.
-Öneri: Politika ihlali durumunda raporlar oluşturmak ve politikayı güncellemek için bu başlığı kullanabilirsiniz. Örnek: Content-Security-Policy-Report-Only: default-src 'self'; report-uri /csp-report-endpoint/""",
+'connect-src' direktifi, web sayfasının hangi ağ bağlantılarına erişebileceğini belirler. 'self', yalnızca aynı kaynaktan gelen ağ bağlantılarına erişilebilir. Daha güvenli bir seçenek, yalnızca belirli kaynaklardan gelen ağ bağlantılarına erişime izin veren 'https://example.com' gibi bir URL belirtmektir.
 
-"Cache-Control":"""Açıklama: Tarayıcıların sayfanın önbelleğe alınma şeklini kontrol etmesini sağlar.
-Öneri: Bu başlığı etkinleştirin ve önbellekleme davranışını belirleyin. Örnek: Cache-Control: no-cache, no-store, must-revalidate""",
+'report-uri' direktifi, CSP ihlallerinin bildirileceği bir URL belirtir. Bu direktifi kullanarak, CSP ihlallerini izleme ve bunları düzeltmek için adımlar atabilirsiniz. 
+Örnek kullanım: "default-src 'self'; script-src 'self' scripts.example.com; img-src *; style-src 'self' styles.example.com" """
+    },
+    'Content-Security-Policy-Report-Only': {
+    'default_value': '',
+    'description': """Bu başlık, bir web sayfasının tarayıcıda yüklenirken hangi kaynaklara (örneğin, betikler, görüntüler, stil dosyaları) erişebileceğini belirler, ancak tarayıcıda CSP ihlalleri oluştuğunda sadece raporlama yapar, yasaklama veya engelleme işlemi uygulamaz. Bu sayede, CSP politikalarınızı test edebilir ve olası ihlalleri izleyebilirsiniz.
+    Örnek kullanım: "default-src 'self'; script-src 'self' scripts.example.com; report-uri /csp-report-endpoint;" """
+},
+    'Referrer-Policy': {
+        'default_value': 'no-referrer',
+        'description': """Bu başlık, bir web sitesinin bir başka web sitesine bir bağlantı gönderirken referans bilgisini (referrer) gönderip göndermeyeceğini kontrol eder.
+no-referrer: Referans bilgisini tamamen engeller. origin: Referans bilgisini, yalnızca bağlantının geldiği web sitesine gönderir.
+same-origin: Referans bilgisini, yalnızca aynı kaynaktan gelen bağlantılara gönderir.strict-origin: Referans bilgisini, yalnızca aynı kaynaktan gelen bağlantılara gönderir ve ayrıca bağlantının geldiği web sitesinin protokolünü, sunucu adresini ve portunu da gönderir.
+origin-when-cross-origin: Referans bilgisini, yalnızca farklı kaynaklardan gelen bağlantılara gönderir ve ayrıca bağlantının geldiği web sitesinin protokolünü, sunucu adresini ve portunu da gönderir."""
+    },
+    'Feature-Policy': {
+        'default_value': '',
+        'description': """Bu headers web sitesinin kullanıcının cihazındaki hangi özelliklerin kullanılabileceğini kontrol eden bir HTTP başlığıdır.Özellik politikası belirtilmelidir.
+Feature-Policy: camera 'none'; microphone 'none'; geolocation 'none' Bu, kamera, mikrofon ve konumunuzun kullanılmasını tamamen engeller."""
+    },
+    'Permissions-Policy': {
+        'default_value': '',
+        'description': 'İzin politikası belirtilmelidir.'
+    },
+    
+    # Diğer güvenlik başlıkları buraya eklenebilir.
+}
 
-"Clear-Site-Data":"""Tarayıcıya belirli verilerin önbelleğini temizlemesi için talimat verir. Gizliliği korur.
-Öneri: Tarayıcı, belirli verileri temizlemek için bu başlığı kullanmalıdır. Örnek: Clear-Site-Data: 'cache', 'cookies'""",
-
-"X-Permitted-Cross-Domain-Policies":"""Adobe Flash uygulamalarının farklı alanlardan veri almasını ve göndermesini kontrol eder.
-Öneri: Bu başlığı etkinleştirin ve uygun bir yapılandırmayı kullanın. Örnek: X-Permitted-Cross-Domain-Policies: none""",
-
-"Expect-CT":"""Sertifika geçerliliğini kontrol etme politikalarını belirler. Sertifika sorunlarını tespit eder ve raporlar.
-Öneri: Bu başlığı etkinleştirin ve geçerlilik kontrol politikalarını belirleyin. Örnek: Expect-CT: enforce, max-age=3600""",  
-
-"Public-Key-Pins":"""Tarayıcılara belirli bir SSL/TLS sertifikasını kullanmalarını emreder. Güvenliği artırır.
-Öneri: Belirli bir sertifikayı kullanması gereken tarayıcıları belirtmek için bu başlığı etkinleştirin. Örnek: Public-Key-Pins: pin-sha256="base64+primary=="; max-age=5184000""",
-
-"X-Content-Security-Policy":"""İçerik güvenliği politikalarını tanımlar.
-Öneri: Tarayıcı, belirli içerik güvenliği politikalarını uygulamak için bu başlığı kullanmalıdır. Örnek: X-Content-Security-Policy: default-src 'self'""",
-
-"X-Download-Options":"""Dosya indirme işlemlerini belirler.
-Öneri: Tarayıcı, dosya indirme işlemlerini belirli bir şekilde işlemek için bu başlığı etkinleştirmelidir. Örnek: X-Download-Options: noopen""",
-
-"X-DNS-Prefetch-Control":"""DNS önbellekleme davranışını kontrol eder.
-Öneri: Tarayıcı, DNS önbellekleme davranışını yapılandırmaya izin veren bu başlığı etkinleştirmelidir. Örnek: X-DNS-Prefetch-Control: off""",
-
-"X-Robots-Tag":"""Web tarayıcılarına ve arama motorlarına sayfanın dizinlenip dizinlenmeyeceğini belirtir.
-Öneri: Sayfanızın dizinlenip dizinlenmeyeceğini belirlemek için bu başlığı etkinleştirin. Örnek: X-Robots-Tag: noindex, nofollow""",
-
-"X-Request-ID":"""İstekleri benzersiz bir şekilde tanımlar ve izler.
-Öneri: İstekleri izlemek ve yönetmek için bu başlığı kullanmalısınız. Örnek: X-Request-ID: unique-id""",
-
-"X-UA-Compatible":"""Tarayıcıların sayfa uyumluluk modunu belirler.
-Öneri: Tarayıcıların sayfanızın uyumluluk modunu doğru şekilde belirlemesi için bu başlığı etkinleştirin. Örnek: X-UA-Compatible: IE=edge"""
-
-    }
-    return descriptions.get(header, "Bu Başlık Kullanılıyor.")
+    if header_name in security_headers:
+        if header_value is None:
+            return f'{header_name} başlığı eksik, doğru değeri olan "{security_headers[header_name]["default_value"]}" ile ayarlanmalıdır.'
+        else:
+            return f'{security_headers[header_name]["description"]}'
+    else:
+        return 'Bu başlık için açıklama bulunamadı.'
 
 def main():
     # Kullanım talimatlarını ve parametreleri göster
@@ -182,7 +223,7 @@ def main():
         console.print(f"[bold green]Geçerli Domain:[/bold green] {args.domain}")
         url = args.domain
         response_headers = get_response_headers(url)
-        args.print= True
+        args.print = True
         if response_headers and args.print:
             console.print("\n[bold cyan]HTTP Response Headers[/bold cyan]")
             table = Table(show_header=True, header_style="bold cyan")
@@ -192,22 +233,29 @@ def main():
                 table.add_row(key, value)
             console.print(table)
         if args.check or args.check_all:
-            headers_to_check = args.check if args.check else default_headers
-            checked_headers = check_headers(headers_to_check, response_headers)
-            console.print("\n[bold cyan]Başlık Kontrolleri[/bold cyan]")
-            table = Table(show_header=True, header_style="bold cyan")
-            table = Table(show_lines=True, header_style="bold cyan")
-            table.add_column("Başlık", style="bold red")
-            table.add_column("Değer", style="bold yellow")
-            table.add_column("Açıklama", style="bold white")
-            for header, value, description in checked_headers:
-                if header in response_headers:
-                    table.add_row(header,value,"OK")
-                else:
-                    table.add_row(header, value, description)
-                
-            console.print(table)
-            
+            headers_to_check = args.check if args.check else list(security_headers.keys())
+            headers_found, headers_not_found = check_headers(headers_to_check, response_headers)
+            console.print("\n[bold cyan]Başlık Kontrolleri (HEADERS and DIRECTIVES)[/bold cyan]\n")
+            table_found = Table(show_header=True, header_style="bold cyan")
+            table_found = Table(show_lines=True, header_style="bold cyan")
+            table_found.add_column("Başlık", style="bold green")
+            table_found.add_column("Değer", style="bold white")
+            table_found.add_column("Açıklama", style="bold white")
+            for header, value, _ in headers_found:
+                description_result = get_header_description(header, value)
+                table_found.add_row(header, value, "[bold green]OK[/bold green] - " + description_result)
+            console.print(table_found)
+
+            console.print("\n[bold cyan]Başlık Kontrolleri (HEADERS)[/bold cyan]\n")
+            table_not_found = Table(show_header=True, header_style="bold cyan")
+            table_not_found = Table(show_lines=True, header_style="bold cyan")
+            table_not_found.add_column("Başlık", style="bold red")
+            table_not_found.add_column("Değer", style="bold yellow")
+            table_not_found.add_column("Açıklama", style="bold white")
+            for header, value, _ in headers_not_found:
+                description_result = get_header_description(header, value)
+                table_not_found.add_row(header, value, "[bold red]Eksik[/bold red] - " + description_result)
+            console.print(table_not_found)
     elif args.target_ip:
         console.print(f"[bold green]Geçerli Hedef IP:[/bold green] {args.target_ip}")
         url = args.target_ip
@@ -222,29 +270,36 @@ def main():
                 table.add_row(key, value)
             console.print(table)
         if args.check or args.check_all:
-            headers_to_check = args.check if args.check else default_headers
-            checked_headers = check_headers(headers_to_check, response_headers)
-            console.print("\n[bold cyan]Başlık Kontrolleri[/bold cyan]\n")
-            table = Table(show_header=True, header_style="bold cyan")
-            table = Table(show_lines=True, header_style="bold cyan")
-            table.add_column("Başlık", style="bold red")
-            table.add_column("Değer", style="bold yellow")
-            table.add_column("Açıklama", style="bold white")
-            for header, value, description in checked_headers:
-                if header in response_headers:
-                    table.add_row(header,value,"OK")
-                    
-                else:
-                    table.add_row(header, value, description)
-                
-                
-            console.print(table)
+            headers_to_check = args.check if args.check else list(security_headers.keys())
+            headers_found, headers_not_found = check_headers(headers_to_check, response_headers)
+            console.print("\n[bold cyan]Başlık Kontrolleri (Başlığı Olanlar)[/bold cyan]\n")
+            table_found = Table(show_header=True, header_style="bold cyan")
+            table_found = Table(show_lines=True, header_style="bold cyan")
+            table_found.add_column("Başlık", style="bold green")
+            table_found.add_column("Değer", style="bold white")
+            table_found.add_column("Açıklama", style="bold white")
+            for header, value, _ in headers_found:
+                description_result = get_header_description(header, value)
+                table_found.add_row(header, value, "[bold green]OK[/bold green] - " + description_result)
+
+            console.print(table_found)
+
+            console.print("\n[bold cyan]Başlık Kontrolleri (Başlığı Olmayanlar)[/bold cyan]\n")
+            table_not_found = Table(show_header=True, header_style="bold cyan")
+            table_not_found = Table(show_lines=True, header_style="bold cyan")
+            table_not_found.add_column("Başlık", style="bold red")
+            table_not_found.add_column("Değer", style="bold yellow")
+            table_not_found.add_column("Açıklama", style="bold white")
+            for header, value, _ in headers_not_found:
+                description_result = get_header_description(header, value)
+                table_not_found.add_row(header, value, "[bold red]Eksik[/bold red] - " + description_result)
+            console.print(table_not_found)
     else:
         console.print("[bold cyan]KOD KULLANIMI[/bold cyan]")
         console.print("=" * 30)
         console.print(
             """Bu tool, belirtilen bir domain veya hedef IP adresi için HTTP yanıt başlıklarını görüntüler.
-Aynı zamanda eksik ve misconfigured headers hakkında çözüm önerileri sunar."""
+Aynı zamanda eksik ve yanlış yapılandırılmış başlıklar hakkında çözüm önerileri sunar."""
         )
         console.print("\n[bold cyan]PARAMETRELER VE KULLANIMI[/bold cyan]")
         console.print("=" * 45)
@@ -254,8 +309,8 @@ Aynı zamanda eksik ve misconfigured headers hakkında çözüm önerileri sunar
         table.add_row("-h ", "Help kütüphanesini getirir.")
         table.add_row("-d DOMAIN", "Domain adresini belirlemek için kullanılır.")
         table.add_row("-t TARGET_IP", "Hedef IP adresini belirlemek için kullanılır.")
-        table.add_row("-c HEADER [HEADER ...]", "Belirli başlıkları kontrol etmek için kullanılır.")
-        table.add_row("-C", "Tüm başlıkları kontrol etmek için kullanılır.")
+        table.add_row("-c HEADER [HEADER ...]", "HTTP başlıklarını kontrol etmek için başlık adları belirtin. Örn. -c Header1 Header2")
+        table.add_row("-C", "Tüm HTTP başlıklarını kontrol etmek için kullanın.")
         console.print(table)
         console.print("\n[bold cyan]KULLANIM ÖRNEKLERİ[/bold cyan]")
         console.print("=" * 30)
@@ -264,7 +319,6 @@ Aynı zamanda eksik ve misconfigured headers hakkında çözüm önerileri sunar
         table.add_column("Komut", style="bold white")
         table.add_row("Domain kontrolü örneği", "python3 httpcheck.py -d www.example.com")
         table.add_row("Hedef IP kontrolü örneği", "python3 httpcheck.py -t 192.168.1.1")
-        table.add_row("Hedef IP kontrolü örneği", "python3 httpcheck.py -t 192.168.1.1 -c Server Date")
         table.add_row("Belirli başlıkları kontrol etme örneği", "python3 httpcheck.py -d www.example.com -c Server Date")
         table.add_row("Tüm başlıkları kontrol etme örneği", "python3 httpcheck.py -d example.com -C")
         console.print(table)
