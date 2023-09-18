@@ -1,4 +1,5 @@
 argparse==1.4.0
-rich==10.8.0
+rich==10.9.0
 requests==2.26.0
-ipaddress==1.0.23
+ipaddress==1.0.24
+urllib3==1.26.6
