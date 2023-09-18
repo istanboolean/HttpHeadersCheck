@@ -25,6 +25,7 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 
 ## Parametreler
 
+
   -Parametre-| -Açıklama-
 | -----------| ------------------------------------------------------------|
 -d DOMAIN    | Domain adresini belirlemek için kullanılır.
@@ -36,6 +37,8 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 -c HEADER [HEADER ...] | Belirli başlıkları kontrol etmek için kullanılır.
 | -----------| ------------------------------------------------------------|
 -C | Tüm başlıkları kontrol etmek için kullanılır.
+| -----------| ------------------------------------------------------------|
+-h --help    | Tool yardım mesajını görüntüler.
 | -----------| ------------------------------------------------------------|
 
 ![Ekran Resmi 2023-09-11 14 59 13](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/c3c8273e-9f81-4c02-86b9-7e521e67d7f0)
