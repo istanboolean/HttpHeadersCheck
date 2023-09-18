@@ -127,7 +127,7 @@ HttpHeadersCheck, aşağıdakiler gibi çeşitli kullanıcılar tarafından kull
 
 HttpHeadersCheck, web sitelerinizi ve hedef IP adreslerinizi daha güvenli hale getirmek için faydalı bir araçtır. Tool'u kullanarak, güvenlik açıklarını tespit edebilir ve bunlara karşı önlemler alabilirsiniz.
 
-**HttpHeadersCheck Betik Açıklaması**
+## HttpHeadersCheck Betik Açıklaması
 
 Bu betik, bir web sitesinin veya hedef IP adresinin HTTP yanıt başlıklarını kontrol etmek için kullanılır. Bu başlıklar, web uygulamalarının güvenliğini artırmak için kullanılır.
 
