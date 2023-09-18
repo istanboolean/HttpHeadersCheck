@@ -5,15 +5,15 @@
 Bu Python tabanlı araç, HTTP yanıt başlıklarını kontrol etmek için tasarlanmıştır. HTTP, web tarayıcıları ve sunucular arasındaki iletişimde kullanılan temel bir protokoldür. Bu araç, verilen bir domain veya hedef IP adresinin HTTP yanıt başlıklarını inceleyerek eksik veya yanlış yapılandırılmış başlıkları tespit etmenizi sağlar. Bu başlıklar, web uygulamanızın güvenliği ve performansı için kritik öneme sahip olan ayarları içerir. Bu nedenle bu araç, web uygulamanızın sağlığını kontrol etmek ve düzeltmek için kullanabileceğiniz önemli bir yardımcıdır.
 
 
-## Kullanım
+## Tool Yükleme ve Kullanım
 
 Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
 
 | Adım | Açıklama |
 | ---- | -------- |
-| 1    | Bu repository'yi klonlayın: `https://github.com/istanboolean/HttpHeadersCheck.git` |
+| 1    | Bu repository'yi klonlayın: ```https://github.com/istanboolean/HttpHeadersCheck.git``` |
 | 2    | Klonladığınız dosya içine gidin: `cd HttpHeadersCheck` |
-| 3    | "httpcheck.py" Python betiğini chmod +x komutunu kullanarak çalıştırılabilir hale getirin.|
+| 3    | "httpcheck.py" Python betiğini ```chmod +x python3 httpcheck.py``` komutunu kullanarak çalıştırılabilir hale getirin.|
 | -    | Gerekli Python kütüphanelerini yükleyin: `pip install -r requirements.txt` Kütüphaneler otomatik yüklenir.|
 
 ![Ekran Resmi 2023-09-11 14 51 19](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/10472de6-0e81-419c-a571-06ea7050690a)
@@ -24,7 +24,6 @@ Tool'u kullanmaya başlamak için aşağıdaki adımları izleyin:
                                                               
 
 ## Parametreler
-
 
   -Parametre-| -Açıklama-
 | -----------| ------------------------------------------------------------|
