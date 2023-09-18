@@ -83,6 +83,7 @@ chmod +x python3 httpcheck.py
 python3 httpcheck.py -h
 ```
 
+![Ekran Resmi 2023-09-11 14 59 13](https://github.com/istanboolean/HttpHeadersCheck/assets/98133561/fcb910d9-e8f9-49af-9292-9008c559d814)
 
 
 ### Kullanım Örnekleri
