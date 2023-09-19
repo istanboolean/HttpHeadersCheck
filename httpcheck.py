@@ -10,16 +10,25 @@ from urllib.parse import urlparse # URL'leri işlemek için
 import urllib3 # SSL Hatasını Giderme (SSL: CERTIFICATE_VERIFY_FAILED)
 # SSL Hatasını Giderme (SSL: CERTIFICATE_VERIFY_FAILED) Hata mesajını gizle
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import codecs
 
-print("""
+def print_logo():
+    logo = """
   _   _ _____ _____ ____     _   _ _____    _    ____  _____ ____  ____     ____ _   _ _____ ____ _  __
- | | | |_   _|_   _|  _ \   | | | | ____|  / \  |  _ \| ____|  _ \/ ___|   / ___| | | | ____/ ___| |/ /
+ | | | |_   _|_   _|  _ \   | | | | ____|  / \  |  _ \| ____|  _ \/ ___|   /___| | | | ____/ ___| |/ /
  | |_| | | |   | | | |_) |  | |_| |  _|   / _ \ | | | |  _| | |_) \___ \  | |   | |_| |  _|| |   | ' / 
  |  _  | | |   | | |  __/   |  _  | |___ / ___ \| |_| | |___|  _ < ___) | | |___|  _  | |__| |___| . \ 
  |_| |_| |_|   |_| |_|      |_| |_|_____/_/   \_\____/|_____|_| \_\____/   \____|_| |_|_____\____|_|\_\_
                                                                                                        
-                                                                            PurpleBox | istanboolean""")
+                                                                            PurpleBox | istanboolean"""
 
+    # Logonun kodlamasını utf-8 olarak ayarlayın.
+    logo_encoded = logo.encode("utf-8")
+
+    # Logonuzu yazdırmak için codecs modülünü kullanın.
+    print(codecs.decode(logo_encoded, "utf-8"))
+
+print_logo()
 
 security_headers = {
     'X-Content-Type-Options': {
@@ -137,31 +146,32 @@ def get_header_description(header_name, header_value):
     'X-Content-Type-Options': {
         'default_value': 'nosniff',
         'description': """Saldırganlar, web sitesinin yanıtlarında bulunan içerik türlerini değiştirerek, tarayıcının yanıtı yanlış yorumlamasını ve saldırganın kodunu çalıştırmasını sağlayabilir.
-Örneğin, bir web sitesi, bir resim dosyasını içeren bir yanıt döndürür. Tarayıcı, yanıtın MIME türünü "image/png" olarak belirler. Ancak, saldırgan, yanıtın MIME türünü "application/javascript" olarak değiştirebilir. 
-Bu, tarayıcının yanıtı JavaScript kodu olarak yorumlamasına ve saldırganın kodunu çalıştırmasına neden olur."""
+X-Content-Type-Options: nosniff (Bu başlık, tarayıcının yanıtı yanlış yorumlamasını ve saldırganın kodunu çalıştırmasını önlemek için, yanıtın MIME türünü analiz etmesini engeller.)
+\033[93mX-Content-Type-Options:nosniff\033[0m önemli bir güvenlik önlemidir. Önerilen değerdir.
+"""
     },
     'X-Frame-Options': {
         'default_value': 'deny',
         'description': """Bu başlık, web sitesinin çerçevelenmesine izin verilip verilmeyeceğini kontrol eder. Güvenli yönergeler şunlardır:
-SAMEORIGIN: Sayfanın yalnızca orijinal kaynağında çerçevelerde görüntülenmesine izin verilir. 
-DENY: Sayfanın hiçbir çerçevede görüntülenmesine izin verilmez. Katı bir security policy gerektiren durumlarda kullanılabilir. Bu, en güvenli seçenektir.
-ALLOW-FROM: Sayfanın yalnızca belirli bir kaynaktan çerçevelerde görüntülenmesine izin verilir. Örneğin, ALLOW-FROM https://example.com/ ile ayarlanırsa, 
+\033[93mSAMEORIGIN:\033[0m Sayfanın yalnızca orijinal kaynağında çerçevelerde görüntülenmesine izin verilir. 
+\033[93mDENY:\033[0m Sayfanın hiçbir çerçevede görüntülenmesine izin verilmez. Katı bir security policy gerektiren durumlarda kullanılabilir. Bu, en güvenli seçenektir.
+\033[93mALLOW-FROM:\033[0m Sayfanın yalnızca belirli bir kaynaktan çerçevelerde görüntülenmesine izin verilir. Örneğin, ALLOW-FROM https://example.com/ ile ayarlanırsa, 
 sayfa yalnızca https://example.com/ içinde çerçevelerde görüntülenebilir."""
     },
     'Strict-Transport-Security': {
         'default_value': 'max-age=31536000',
         'description': """HTTPS üzerinden erişimi zorunlu kılar. Bu, saldırganların HTTP üzerinden saldırmasını zorlaştırır. 
 HTTPS kullanımını zorlamak ve sertifikayı bir yıl boyunca hatırlamak için "max-age=31536000" ile ayarlanmalıdır.
-max-age: HSTS başlığının ne kadar süreyle geçerli olacağını belirtir. Bu örnekte, HSTS başlığı 1 yıl (31536000 saniye) boyunca geçerli olacaktır.
-includeSubDomains: HSTS başlığının sitenin tüm alt etki alanlarını da kapsayacağını belirtir. Bu, saldırganların HTTP üzerinden alt etki alanlarından saldırmasını zorlaştırır.
-preload: Tarayıcıların HSTS başlığını önbelleğe almasını sağlar. Bu, kullanıcıların web sitesine ilk kez eriştiklerinde bile HTTPS üzerinden erişmelerini sağlar. """
+\033[93mmax-age:\033[0m HSTS başlığının ne kadar süreyle geçerli olacağını belirtir. Bu örnekte, HSTS başlığı 1 yıl (31536000 saniye) boyunca geçerli olacaktır.
+\033[93mincludeSubDomains:\033[0m HSTS başlığının sitenin tüm alt etki alanlarını da kapsayacağını belirtir. Bu, saldırganların HTTP üzerinden alt etki alanlarından saldırmasını zorlaştırır.
+\033[93mpreload:\033[0m Tarayıcıların HSTS başlığını önbelleğe almasını sağlar. Bu, kullanıcıların web sitesine ilk kez eriştiklerinde bile HTTPS üzerinden erişmelerini sağlar. """
     },
     'X-XSS-Protection': {
         'default_value': '1; mode=block',
         'description': """Tarayıcıyı otomatik olarak XSS saldırılarını engellemek için "1; mode=block" ile ayarlanmalıdır.
-0: XSS koruması devre dışı bırakılır.
-1: XSS koruması etkinleştirilir, ancak tarayıcının kendi XSS korumasını kullanmaya devam etmesine izin verilir.
-1; mode=block: XSS koruması etkinleştirilir ve tarayıcının kendi XSS korumasını kullanmasına izin verilmez. Bu, en güvenli seçenektir."""
+\033[93m0:\033[0m XSS koruması devre dışı bırakılır.
+\033[93m1:\033[0m XSS koruması etkinleştirilir, ancak tarayıcının kendi XSS korumasını kullanmaya devam etmesine izin verilir.
+\033[93m1;\033[0m mode=block: XSS koruması etkinleştirilir ve tarayıcının kendi XSS korumasını kullanmasına izin verilmez. Bu, en güvenli seçenektir."""
     },
     'Content-Security-Policy': {
         'default_value': '',
@@ -192,13 +202,16 @@ web sitesinin tarayıcıda yüklenirken hangi kaynaklara erişebileceğini kontr
     'Referrer-Policy': {
         'default_value': 'no-referrer',
         'description': """Bu başlık, bir web sitesinin bir başka web sitesine bir bağlantı gönderirken referans bilgisini (referrer) gönderip göndermeyeceğini kontrol eder.
-no-referrer: Referans bilgisini tamamen engeller. origin: Referans bilgisini, yalnızca bağlantının geldiği web sitesine gönderir.
-same-origin: Referans bilgisini, yalnızca aynı kaynaktan gelen bağlantılara gönderir.strict-origin: Referans bilgisini, yalnızca aynı kaynaktan gelen bağlantılara gönderir ve ayrıca bağlantının geldiği web sitesinin protokolünü, sunucu adresini ve portunu da gönderir.
-origin-when-cross-origin: Referans bilgisini, yalnızca farklı kaynaklardan gelen bağlantılara gönderir ve ayrıca bağlantının geldiği web sitesinin protokolünü, sunucu adresini ve portunu da gönderir."""
+\033[93mno-referrer:\033[0m Referans bilgisini tamamen engeller. origin: Referans bilgisini, yalnızca bağlantının geldiği web sitesine gönderir.
+\033[93msame-origin:\033[0m Referans bilgisini, yalnızca aynı kaynaktan gelen bağlantılara gönderir.strict-origin: Referans bilgisini, yalnızca aynı kaynaktan gelen bağlantılara gönderir ve ayrıca bağlantının geldiği web sitesinin protokolünü, sunucu adresini ve portunu da gönderir.
+\033[93morigin-when-cross-origin:\033[0m Referans bilgisini, yalnızca farklı kaynaklardan gelen bağlantılara gönderir ve ayrıca bağlantının geldiği web sitesinin protokolünü, sunucu adresini ve portunu da gönderir."""
     },
     'Feature-Policy': {
         'default_value': '',
         'description': """Bu headers web sitesinin kullanıcının cihazındaki hangi özelliklerin kullanılabileceğini kontrol eden bir HTTP başlığıdır.Özellik politikası belirtilmelidir.
+\033[93mself:\033[0m Özelliğin veya API'nin yalnızca kendi kaynak tarafından kullanılmasına izin verir.
+\033[93mnone:\033[0m Özelliğin veya API'nin hiç kullanılmasına izin vermez.
+\033[93m*:\033[0m Özelliğin veya API'nin her kaynak tarafından kullanılmasına izin verir.
 Feature-Policy: camera 'none'; microphone 'none'; geolocation 'none' Bu, kamera, mikrofon ve konumunuzun kullanılmasını tamamen engeller."""
     },
     'Permissions-Policy': {
